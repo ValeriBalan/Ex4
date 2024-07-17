@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 8081;
 const { usersRouter } = require('./routers/users_routers.js');
+const vacation_preferences = require('./data/vacation_preferences.json');
 
 app.use((req, res, next) => {
     res.set({
@@ -15,6 +16,12 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
+app.get('/', (req, res) => {
+    res.send('Welcome to the User Management API');
+});
+app.get("/api/vacation_preferences", (req,res) =>{
+    res.json(vacation_preferences);
+});
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/users', usersRouter);
 
