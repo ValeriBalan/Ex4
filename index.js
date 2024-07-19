@@ -3,6 +3,8 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 8081;
 const { usersRouter } = require('./routers/users_routers.js');
+const { PostsRouter } = require('./routers/posts_routers.js');
+
 const vacation_preferences = require('./data/vacation_preferences.json');
 
 app.use((req, res, next) => {
@@ -24,6 +26,7 @@ app.get("/api/vacation_preferences", (req,res) =>{
 });
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/users', usersRouter);
+app.use('/api/posts', PostsRouter);
 
 app.use((req, res) => {
     console.error('Path not found:', req.path);
