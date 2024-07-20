@@ -14,6 +14,7 @@ exports.users_controller = {
     },
     async fetchUser(user_id, access_code) {
         try {
+            const { dbConnection } = require('../db_connection');
             const connection = await dbConnection.createConnection();
             const [users] = await connection.execute('SELECT * FROM tbl_26_users WHERE user_id = ? AND access_code = ?', [user_id, access_code]);
             connection.end();
