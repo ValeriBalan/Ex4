@@ -14,6 +14,7 @@ exports.posts_controller = {
     },
     async updatePreference(req, res) {
         const { dbConnection } = require('../db_connection');
+        const { users_controller } = require('./users_controller');
         const vacationPreferences = require('../data/vacation_preferences.json');
         const { user_id, access_code, start_date, end_date, location, type_of_vacation } = req.body;
 
@@ -23,7 +24,7 @@ exports.posts_controller = {
 
         try {
             const connection = await dbConnection.createConnection();
-            const [users] = await connection.execute('SELECT user_id FROM tbl_26_users WHERE access_code = ?', [ access_code]);
+            const [users] = await users_controller.getUser(user_id, access_code);
             if (users.length === 0) {
                 connection.end();
                 return res.status(404).json({ success: false, message: 'User not found in database' });
