@@ -23,13 +23,12 @@ exports.posts_controller = {
 
         try {
             const connection = await dbConnection.createConnection();
-           
             const [users] = await connection.execute('SELECT user_id FROM tbl_26_users WHERE access_code = ?', [ access_code]);
             if (users.length === 0) {
                 connection.end();
                 return res.status(404).json({ success: false, message: 'User not found in database' });
             }
-
+            console.log(users.id, users.access_code);
             if (!vacationPreferences.locations.includes(location)) {
                 connection.end();
                 return res.status(400).json({ success: false, message: 'Invalid location' });
@@ -44,6 +43,7 @@ exports.posts_controller = {
                            SET start_date = ?, end_date = ?, location = ?, type_of_vacation = ?
                            WHERE user_id = ?`;
             const values = [start_date, end_date, location, type_of_vacation, user_id];
+           console.log(values);
             const [result] = await connection.execute(query, values);
             connection.end();
 
