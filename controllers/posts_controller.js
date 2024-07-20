@@ -12,40 +12,19 @@ exports.posts_controller = {
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     },
-    async addPreference(req, res) {
+    async addPreference(req, res, values) {
         const { dbConnection } = require('../db_connection');
-        const vacationPreferences = require('../data/vacation_preferences.json');
-        const { access_code, start_date, end_date, location, type_of_vacation } = req.body;
-
         try {
             const connection = await dbConnection.createConnection();
-            const [users] = await connection.execute('SELECT user_id FROM tbl_26_users WHERE access_code = ?', [access_code]);
-            if (users.length === 0) {
-                connection.end();
-                return res.status(400).json({ success: false, message: 'Invalid access code' });
-            }
-
-            const user_id = users[0].user_id;
-
-            if (!vacationPreferences.locations.includes(location)) {
-                connection.end();
-                return res.status(400).json({ success: false, message: 'Invalid location' });
-            }
-
-            if (!vacationPreferences.vacation_types.includes(type_of_vacation)) {
-                connection.end();
-                return res.status(400).json({ success: false, message: 'Invalid vacation type' });
-            }
-
-            const [result] = await connection.execute(
-                'INSERT INTO tbl_26_posts (user_id, start_date, end_date, location, type_of_vacation) VALUES (?, ?, ?, ?, ?)',
-                [user_id, start_date, end_date, location, type_of_vacation]
-            );
+            const query = `
+                INSERT INTO tbl_22_vacations (user_id, start_date, end_date, location, vacationType)
+                VALUES (?, ?, ?, ? ,?)
+            `;
+            const [result] = await connection.execute(query, values);
             connection.end();
-
-            res.json({ success: true, message: 'Post inserted successfully', post_id: result.insertId });
+            res.json({ success: true, message: 'Preference added successfully!' });
         } catch (error) {
-            console.error('Error inserting post:', error);
+            console.error('Error booking vacation:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     }
