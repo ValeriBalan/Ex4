@@ -18,32 +18,25 @@ exports.posts_controller = {
         const { user_id, access_code, start_date, end_date, location, type_of_vacation } = req.body;
 
         if (!user_id || !access_code || !start_date || !end_date || !location || !type_of_vacation) {
-            console.error('Missing required fields:', req.body);
             return res.status(400).json({ success: false, message: 'All fields are required' });
         }
 
         try {
             const connection = await dbConnection.createConnection();
-            console.log('Database connection established');
-
-            // Check if the user exists
-            const [users] = await connection.execute('SELECT user_id FROM tbl_26_users WHERE user_id = ? AND access_code = ?', [user_id, access_code]);
+           
+            const [users] = await connection.execute('SELECT user_id FROM tbl_26_users WHERE access_code = ?', [ access_code]);
             if (users.length === 0) {
                 connection.end();
-                console.error('User not found in database:', { user_id, access_code });
                 return res.status(404).json({ success: false, message: 'User not found in database' });
             }
 
-            // Validate location and type of vacation
             if (!vacationPreferences.locations.includes(location)) {
                 connection.end();
-                console.error('Invalid location:', location);
                 return res.status(400).json({ success: false, message: 'Invalid location' });
             }
 
             if (!vacationPreferences.vacation_types.includes(type_of_vacation)) {
                 connection.end();
-                console.error('Invalid vacation type:', type_of_vacation);
                 return res.status(400).json({ success: false, message: 'Invalid vacation type' });
             }
 
@@ -51,11 +44,8 @@ exports.posts_controller = {
                            SET start_date = ?, end_date = ?, location = ?, type_of_vacation = ?
                            WHERE user_id = ?`;
             const values = [start_date, end_date, location, type_of_vacation, user_id];
-            console.log('Executing query:', query, 'with values:', values);
-
             const [result] = await connection.execute(query, values);
             connection.end();
-            console.log('Query result:', result);
 
             if (result.affectedRows > 0) {
                 res.json({ success: true, message: 'Preference details updated successfully' });
