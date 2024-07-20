@@ -12,21 +12,10 @@ exports.posts_controller = {
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     },
-    async fetchUser(user_id, access_code) {
-        try {
-            const connection = await dbConnection.createConnection();
-            const [users] = await connection.execute('SELECT * FROM tbl_26_users WHERE user_id = ? AND access_code = ?', [user_id, access_code]);
-            connection.end();
-            return users;
-        } catch (error) {
-            console.error('Error fetching users:', error);
-            throw error;
-        }
-    },
     async updatePreference(req, res) {
         const { dbConnection } = require('../db_connection');
         const { users_controller } = require('./users_controller');
-        const { getUser } = users_controller;
+        const { fetchUser } = users_controller;
         const vacationPreferences = require('../data/vacation_preferences.json');
         const { user_id, access_code, start_date, end_date, location, type_of_vacation } = req.body;
 
@@ -36,7 +25,7 @@ exports.posts_controller = {
 
         try {
             const connection = await dbConnection.createConnection();
-            const [users] = await getUser(user_id, access_code);
+            const [users] = await fetchUser(user_id, access_code);
             if (users.length === 0) {
                 connection.end();
                 return res.status(404).json({ success: false, message: 'User not found in database' });
