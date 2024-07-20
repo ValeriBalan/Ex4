@@ -14,29 +14,38 @@ exports.posts_controller = {
     },
     async updatePreference(req, res) {
         const { dbConnection } = require('../db_connection');
-        const { users_controller } = require('./users_controller');
-        const { getUser } = users_controller;
-        const { user_id, start_date, end_date, location, type_of_vecation } = req.body;
-        if (!type_of_vecation || !location || !start_date || !end_date || !user_id) {
-            return res.status(400).json({ success: false, message: 'Access code and updated values are required' });
+        const { user_id, access_code, start_date, end_date, location, type_of_vacation } = req.body;
+
+        if (!user_id || !access_code || !start_date || !end_date || !location || !type_of_vacation) {
+            return res.status(400).json({ success: false, message: 'All fields are required' });
         }
+
         try {
             const connection = await dbConnection.createConnection();
-            const userInDatabase = await getUser(user_id.name, user_id.access_code);
-             if (!userInDatabase) {
-                 return res.status(404).json({ success: false, message: 'User not found in database' });
-                  }
-            if (user_id.length === 0) {
+
+            const [users] = await connection.execute('SELECT user_id FROM tbl_26_users WHERE user_id = ? AND access_code = ?', [user_id, access_code]);
+            if (users.length === 0) {
                 connection.end();
-                return res.status(404).json({ success: false, message: 'User not found' });
+                return res.status(404).json({ success: false, message: 'User not found in database' });
             }
-            const query = `
-                UPDATE tbl_26_posts
-                SET start_date = ?, end_date = ?, location = ?, type_of_vecation = ?
-                WHERE user_id = ?`;
-            const values = [location,start_date, end_date,type_of_vecation, user_id.name];
+
+            if (!vacationPreferences.locations.includes(location)) {
+                connection.end();
+                return res.status(400).json({ success: false, message: 'Invalid location' });
+            }
+
+            if (!vacationPreferences.vacation_types.includes(type_of_vacation)) {
+                connection.end();
+                return res.status(400).json({ success: false, message: 'Invalid vacation type' });
+            }
+
+            const query = `UPDATE tbl_26_posts
+                           SET start_date = ?, end_date = ?, location = ?, type_of_vacation = ?
+                           WHERE user_id = ?`;
+            const values = [start_date, end_date, location, type_of_vacation, user_id];
             const [result] = await connection.execute(query, values);
             connection.end();
+
             if (result.affectedRows > 0) {
                 res.json({ success: true, message: 'Preference details updated successfully' });
             } else {
