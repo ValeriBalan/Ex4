@@ -17,15 +17,15 @@ exports.posts_controller = {
         const { users_controller } = require('./users_controller');
         const { fetchUser } = users_controller;
         const vacationPreferences = require('../data/vacation_preferences.json');
-        const { user_id, access_code, start_date, end_date, location, type_of_vacation } = req.body;
+        const { users_id, access_code, start_date, end_date, location, type_of_vacation } = req.body;
 
-        if (!user_id || !access_code || !start_date || !end_date || !location || !type_of_vacation) {
+        if (!users_id || !access_code || !start_date || !end_date || !location || !type_of_vacation) {
             return res.status(400).json({ success: false, message: 'All fields are required' });
         }
 
         try {
             const connection = await dbConnection.createConnection();
-            const [users] = await fetchUser(user_id, access_code);
+            const [users] = await fetchUser(users_id, access_code);
             if (users.length === 0) {
                 connection.end();
                 return res.status(404).json({ success: false, message: 'User not found in database' });
@@ -43,8 +43,8 @@ exports.posts_controller = {
 
             const query = `UPDATE tbl_26_posts
                            SET start_date = ?, end_date = ?, location = ?, type_of_vacation = ?
-                           WHERE user_id = ?`;
-            const values = [start_date, end_date, location, type_of_vacation, user_id];
+                           WHERE users_id = ?`;
+            const values = [start_date, end_date, location, type_of_vacation, users_id];
            console.log(values);
             const [result] = await connection.execute(query, values);
             connection.end();
@@ -52,7 +52,7 @@ exports.posts_controller = {
             if (result.affectedRows > 0) {
                 res.json({ success: true, message: 'Preference details updated successfully' });
             } else {
-                console.error('No preference found for the user:', user_id);
+                console.error('No preference found for the user:', users_id);
                 res.status(404).json({ success: false, message: 'No preference found for the user' });
             }
         } catch (error) {

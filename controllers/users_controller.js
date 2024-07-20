@@ -12,7 +12,7 @@ exports.users_controller = {
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     },
-    async fetchUser(user_id, access_code) {
+    async fetchUser(users_id, access_code) {
         try {
             const { dbConnection } = require('../db_connection');
             const connection = await dbConnection.createConnection();
