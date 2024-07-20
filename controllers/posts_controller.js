@@ -43,7 +43,10 @@ exports.posts_controller = {
             const query = `UPDATE tbl_26_posts
                            SET start_date = ?, end_date = ?, location = ?, type_of_vacation = ?
                            WHERE user_id = ?`;
-            const values = [start_date, end_date, location, type_of_vacation, user_id];
+            const values = [user_id, start_date, end_date, location, type_of_vacation];
+            console.log(query);
+            console.log(values);
+
             const [result] = await connection.execute(query, values);
             connection.end();
 
