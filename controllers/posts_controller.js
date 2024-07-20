@@ -20,6 +20,7 @@ exports.posts_controller = {
         const { users_id, access_code, start_date, end_date, location, type_of_vacation } = req.body;
 
         if (!users_id || !access_code || !start_date || !end_date || !location || !type_of_vacation) {
+            console.log(req.body);
             return res.status(400).json({ success: false, message: 'All fields are required' });
         }
 
