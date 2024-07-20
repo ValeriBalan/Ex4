@@ -14,6 +14,7 @@ exports.posts_controller = {
     },
     async updatePreference(req, res) {
         const { dbConnection } = require('../db_connection');
+        const vacationPreferences = require('../data/vacation_preferences.json');
         const { user_id, access_code, start_date, end_date, location, type_of_vacation } = req.body;
 
         if (!user_id || !access_code || !start_date || !end_date || !location || !type_of_vacation) {
@@ -38,7 +39,7 @@ exports.posts_controller = {
                 connection.end();
                 return res.status(400).json({ success: false, message: 'Invalid vacation type' });
             }
-
+            console.log(req.body);
             const query = `UPDATE tbl_26_posts
                            SET start_date = ?, end_date = ?, location = ?, type_of_vacation = ?
                            WHERE user_id = ?`;
