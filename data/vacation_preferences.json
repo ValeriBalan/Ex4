@@ -1,5 +1,5 @@
 {
-    "category": "vacation preferences",
+    "category": "vacationPreferences",
     "locations": ["Portugal", "Romania", "Germany", "Denmark", "France", "Italy", "Finland", "Sweden", "Spain", "Norway"],
     "vacation_types": ["Camping", "Sightseeing", "adventure", "cultural", "beach"]
 }

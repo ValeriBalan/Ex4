@@ -23,6 +23,7 @@ app.get('/', (req, res) => {
 });
 app.get("/api/vacation_preferences", (req,res) =>{
     res.json(vacation_preferences);
+    console.log(vacation_preferences);
 });
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/users', usersRouter);
