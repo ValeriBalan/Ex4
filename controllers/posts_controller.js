@@ -24,7 +24,7 @@ exports.posts_controller = {
 
         try {
             const connection = await dbConnection.createConnection();
-            const [users] = await users_controller.getUser(user_id, access_code);
+            const [users] = await connection.execute('SELECT * FROM tbl_26_users WHERE user_id = ? AND access_code = ?', [user_id, access_code]);
             if (users.length === 0) {
                 connection.end();
                 return res.status(404).json({ success: false, message: 'User not found in database' });
