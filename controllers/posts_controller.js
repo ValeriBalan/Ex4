@@ -39,11 +39,11 @@ exports.posts_controller = {
                 connection.end();
                 return res.status(400).json({ success: false, message: 'Invalid vacation type' });
             }
-            console.log(req.body);
+
             const query = `UPDATE tbl_26_posts
                            SET start_date = ?, end_date = ?, location = ?, type_of_vacation = ?
                            WHERE user_id = ?`;
-            const values = [user_id, start_date, end_date, location, type_of_vacation];
+            const values = [start_date, end_date, location, type_of_vacation, user_id];
             console.log(query);
             console.log(values);
 
