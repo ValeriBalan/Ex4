@@ -151,6 +151,7 @@ exports.posts_controller = {
             });
             const majorityLocation = Object.keys(locationCount).reduce((a, b) => locationCount[a] > locationCount[b] ? a : b);
             const majorityVacationType = Object.keys(vacationTypeCount).reduce((a, b) => vacationTypeCount[a] > vacationTypeCount[b] ? a : b);
+            console.log(majorityLocation, majorityVacationType);
 
             let latestStartDate = new Date(Math.max(...preferences.map(pref => new Date(pref.start_date))));
             let earliestEndDate = new Date(Math.min(...preferences.map(pref => new Date(pref.end_date))));
@@ -161,6 +162,7 @@ exports.posts_controller = {
             const earliestPreference = preferences.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0];
             const finalLocation = locationCount[majorityLocation] > 1 ? majorityLocation : earliestPreference.location;
             const finalVacationType = vacationTypeCount[majorityVacationType] > 1 ? majorityVacationType : earliestPreference.type_of_vacation;
+            console.log(finalLocation, finalVacationType);
             connection.end();
 
             return {
