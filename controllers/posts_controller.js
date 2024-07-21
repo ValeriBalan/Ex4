@@ -141,6 +141,9 @@ exports.posts_controller = {
                 return { success: false, message: "We have to wait for everyone's preferences." };
             }
             console.log(true);
+        } catch (error) {
+            console.error('Error calculating vacation results:', error);
+            return { success: false, message: 'Internal Server Error' };
         }
     }
 };
