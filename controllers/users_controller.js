@@ -16,7 +16,7 @@ exports.users_controller = {
         try {
             const { dbConnection } = require('../db_connection');
             const connection = await dbConnection.createConnection();
-            const [users] = await connection.execute('SELECT * FROM tbl_26_users WHERE user_name = ? AND access_code = ?', [user_name, access_code]);
+            const users = await connection.execute('SELECT * FROM tbl_26_users WHERE user_name = ? AND access_code = ?', [user_name, access_code]);
             connection.end();
             return users;
         } catch (error) {
