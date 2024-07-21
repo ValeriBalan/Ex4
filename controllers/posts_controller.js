@@ -1,3 +1,4 @@
+
 exports.posts_controller = {
     async getPosts(req, res) {
         const { dbConnection } = require('../db_connection');
@@ -138,11 +139,9 @@ exports.posts_controller = {
             `);
     
             if (usersWithoutPreferences.length > 0) {
-                connection.end();
                 return { success: false, message: "We have to wait for everyone's preferences." };
             }
             console.log(true);
-
         } catch (error) {
             console.error('Error calculating vacation results:', error);
             return { success: false, message: 'Internal Server Error' };
