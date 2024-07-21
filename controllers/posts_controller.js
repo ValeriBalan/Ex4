@@ -141,6 +141,36 @@ exports.posts_controller = {
                 return { success: false, message: "We have to wait for everyone's preferences." };
             }
             console.log(true);
+
+            const [preferences] = await connection.execute('SELECT * FROM tbl_26_posts');
+            const locationCount = {};
+            const vacationTypeCount = {};
+            preferences.forEach(pref => {
+                locationCount[pref.location] = (locationCount[pref.location] || 0) + 1;
+                vacationTypeCount[pref.type_of_vacation] = (vacationTypeCount[pref.type_of_vacation] || 0) + 1;
+            });
+            const majorityLocation = Object.keys(locationCount).reduce((a, b) => locationCount[a] > locationCount[b] ? a : b);
+            const majorityVacationType = Object.keys(vacationTypeCount).reduce((a, b) => vacationTypeCount[a] > vacationTypeCount[b] ? a : b);
+
+            let latestStartDate = new Date(Math.max(...preferences.map(pref => new Date(pref.start_date))));
+            let earliestEndDate = new Date(Math.min(...preferences.map(pref => new Date(pref.end_date))));
+
+            if (latestStartDate > earliestEndDate) {
+                return { success: false, message: "No overlapping dates found." };
+            }
+            const earliestPreference = preferences.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0];
+            const finalLocation = locationCount[majorityLocation] > 1 ? majorityLocation : earliestPreference.location;
+            const finalVacationType = vacationTypeCount[majorityVacationType] > 1 ? majorityVacationType : earliestPreference.type_of_vacation;
+            connection.end();
+
+            return {
+                success: true,
+                location: finalLocation,
+                type_of_vacation: finalVacationType,
+                start_date: latestStartDate.toISOString().split('T')[0],
+                end_date: earliestEndDate.toISOString().split('T')[0]
+            };
+
         } catch (error) {
             console.error('Error calculating vacation results:', error);
             return { success: false, message: 'Internal Server Error' };
