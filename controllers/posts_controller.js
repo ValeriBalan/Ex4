@@ -109,7 +109,7 @@ exports.posts_controller = {
 
             const query =  `INSERT INTO tbl_26_posts ( access_code, start_date, end_date, location, type_of_vacation)
                             VALUES ( ?, ?, ?, ?, ?)`;
-            const values = [user_name, access_code, start_date, end_date, location, type_of_vacation];
+            const values = [ access_code, start_date, end_date, location, type_of_vacation];
             console.log(values);
             const [result] = await connection.execute(query, values);
             connection.end();
