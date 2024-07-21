@@ -124,5 +124,23 @@ exports.posts_controller = {
             console.error('Error adding preference:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
+    },
+    async  calculateVacationResults() {
+        const { dbConnection } = require('../db_connection');
+        try {
+            const connection = await dbConnection.createConnection();
+    
+            const [usersWithoutPreferences] = await connection.execute(`
+                SELECT u.user_id 
+                FROM tbl_26_users u 
+                LEFT JOIN tbl_26_posts p ON u.user_id = p.user_id 
+                WHERE p.user_id IS NULL
+            `);
+    
+            if (usersWithoutPreferences.length > 0) {
+                return { success: false, message: "We have to wait for everyone's preferences." };
+            }
+            console.log(true);
+        }
     }
 };
