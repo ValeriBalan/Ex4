@@ -155,6 +155,7 @@ exports.posts_controller = {
 
             let latestStartDate = new Date(Math.max(...preferences.map(pref => new Date(pref.start_date))));
             let earliestEndDate = new Date(Math.min(...preferences.map(pref => new Date(pref.end_date))));
+            console.log(latestStartDate, earliestEndDate);
 
             if (latestStartDate > earliestEndDate) {
                 return { success: false, message: "No overlapping dates found." };
