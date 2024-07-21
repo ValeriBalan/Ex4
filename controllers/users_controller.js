@@ -12,11 +12,11 @@ exports.users_controller = {
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     },
-    async fetchUser(users_id, access_code) {
+    async fetchUser(user_name, access_code) {
         try {
             const { dbConnection } = require('../db_connection');
             const connection = await dbConnection.createConnection();
-            const [users] = await connection.execute('SELECT * FROM tbl_26_users WHERE users_id = ? AND access_code = ?', [users_id, access_code]);
+            const [users] = await connection.execute('SELECT * FROM tbl_26_users WHERE user_name = ? AND access_code = ?', [user_name, access_code]);
             connection.end();
             return users;
         } catch (error) {
