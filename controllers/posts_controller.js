@@ -138,6 +138,7 @@ exports.posts_controller = {
             `);
     
             if (usersWithoutPreferences.length > 0) {
+                connection.end();
                 return { success: false, message: "We have to wait for everyone's preferences." };
             }
             console.log(true);
@@ -158,6 +159,7 @@ exports.posts_controller = {
             console.log(latestStartDate, earliestEndDate);
 
             if (latestStartDate > earliestEndDate) {
+                connection.end();
                 return { success: false, message: "No overlapping dates found." };
             }
             const earliestPreference = preferences.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0];
