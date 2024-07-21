@@ -142,8 +142,12 @@ exports.posts_controller = {
                 return { success: false, message: "We have to wait for everyone's preferences." };
             }
             console.log(true);
-
             const [preferences] = await connection.execute('SELECT * FROM tbl_26_posts');
+            if (preferences.length === 0) {
+                connection.end();
+                return { success: false, message: "No preferences found." };
+            }
+
             const locationCount = {};
             const vacationTypeCount = {};
             preferences.forEach(pref => {
@@ -162,6 +166,7 @@ exports.posts_controller = {
                 connection.end();
                 return { success: false, message: "No overlapping dates found." };
             }
+
             const earliestPreference = preferences.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0];
             const finalLocation = locationCount[majorityLocation] > 1 ? majorityLocation : earliestPreference.location;
             const finalVacationType = vacationTypeCount[majorityVacationType] > 1 ? majorityVacationType : earliestPreference.type_of_vacation;
