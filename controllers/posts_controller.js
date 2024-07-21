@@ -131,10 +131,10 @@ exports.posts_controller = {
             const connection = await dbConnection.createConnection();
     
             const [usersWithoutPreferences] = await connection.execute(`
-                SELECT u.user_id 
+                SELECT u.access_code 
                 FROM tbl_26_users u 
-                LEFT JOIN tbl_26_posts p ON u.user_id = p.user_id 
-                WHERE p.user_id IS NULL
+                LEFT JOIN tbl_26_posts p ON u.access_code = p.access_code
+                WHERE p.access_code IS NULL
             `);
     
             if (usersWithoutPreferences.length > 0) {
