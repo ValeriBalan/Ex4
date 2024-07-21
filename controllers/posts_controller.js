@@ -125,7 +125,7 @@ exports.posts_controller = {
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     },
-    async  calculateVacationResults() {
+    async calculateVacationResults() {
         const { dbConnection } = require('../db_connection');
         try {
             const connection = await dbConnection.createConnection();
@@ -143,11 +143,7 @@ exports.posts_controller = {
             }
             console.log(true);
             const [preferences] = await connection.execute('SELECT * FROM tbl_26_posts');
-            if (preferences.length === 0) {
-                connection.end();
-                return { success: false, message: "No preferences found." };
-            }
-
+        
             const locationCount = {};
             const vacationTypeCount = {};
             preferences.forEach(pref => {
