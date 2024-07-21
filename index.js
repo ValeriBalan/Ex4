@@ -7,11 +7,12 @@ const { postsRouter } = require('./routers/posts_routers.js');
 const vacation_preferences = require('./data/vacation_preferences.json');
 
 const port = process.env.PORT || 8081;
+
 app.use((req, res, next) => {
     res.set({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-        'Access-Control-Allow-Methods': "GET, POST, PUT, DELETE",
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
         'Content-Type': 'application/json'
     });
     next();
@@ -25,7 +26,7 @@ app.get('/', (req, res) => {
     res.send('Welcome to the User Management API');
 });
 
-app.get("/api/vacation_preferences", (req, res) => {
+app.get('/api/vacation_preferences', (req, res) => {
     res.json(vacation_preferences);
 });
 
