@@ -2,11 +2,11 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const port = process.env.PORT || 8081;
 const { usersRouter } = require('./routers/users_routers.js');
 const { postsRouter } = require('./routers/posts_routers.js');
 const vacation_preferences = require('./data/vacation_preferences.json');
 
+const port = process.env.PORT || 8081;
 app.use((req, res, next) => {
     res.set({
         'Access-Control-Allow-Origin': '*',
@@ -27,7 +27,6 @@ app.get('/', (req, res) => {
 
 app.get("/api/vacation_preferences", (req, res) => {
     res.json(vacation_preferences);
-    console.log(vacation_preferences);
 });
 
 app.use('/api/users', usersRouter);
