@@ -40,7 +40,7 @@ exports.users_controller = {
             );
     
             connection.end();
-            res.send(true, accessCode);
+            res.status(201).json({ success: true, accessCode });
         } catch (error) {
             console.error('Error inserting user:', error);
             res.status(500).send(false);
