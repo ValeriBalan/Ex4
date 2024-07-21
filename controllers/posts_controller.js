@@ -125,80 +125,60 @@ exports.posts_controller = {
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     },
-    async calculateVacationResults() {
+    async  calculateVacationResults() {
         const { dbConnection } = require('../db_connection');
         try {
             const connection = await dbConnection.createConnection();
-            const [members] = await connection.execute('SELECT * FROM tbl_22_vacations');
-            connection.end();
-            const allPreferencesFilled =  members.every(member => member.place && member.vacationType && member.startDate && member.endDate);
-            console.log('Members:', members);
-            if (!allPreferencesFilled && members.length != 5) {
-                return res.status(400).json({ success: false, message: "We have to wait for everyone's preferences." });
-            }
-            const validateDate = (date) => {
-                return /^\d{4}-\d{2}-\d{2}$/.test(date) && !isNaN(new Date(date).getTime());
-            };
     
-            const invalidDates = members.filter(member => !validateDate(member.start_date.toISOString().split('T')[0]) || !validateDate(member.end_date.toISOString().split('T')[0]));
-            if (invalidDates.length > 0) {
-                console.log('Invalid Date Entries:', invalidDates);
-                return res.status(400).json({ success: false, message: "Invalid date values provided." });
+            const [usersWithoutPreferences] = await connection.execute(`
+                SELECT u.access_code 
+                FROM tbl_26_users u 
+                LEFT JOIN tbl_26_posts p ON u.access_code = p.access_code
+                WHERE p.access_code IS NULL
+            `);
+    
+            if (usersWithoutPreferences.length > 0) {
+                connection.end();
+                return { success: false, message: "We have to wait for everyone's preferences." };
             }
-            const placeCount = {};
-            members.forEach(member => {
-                if (member.place) {
-                    if (placeCount[member.place]) {
-                        placeCount[member.place]++;
-                    } else {
-                        placeCount[member.place] = 1;
-                    }
-                }
+            console.log(true);
+
+            const [preferences] = await connection.execute('SELECT * FROM tbl_26_posts');
+            const locationCount = {};
+            const vacationTypeCount = {};
+            preferences.forEach(pref => {
+                locationCount[pref.location] = (locationCount[pref.location] || 0) + 1;
+                vacationTypeCount[pref.type_of_vacation] = (vacationTypeCount[pref.type_of_vacation] || 0) + 1;
             });
-            const places = Object.keys(placeCount);
-            let chosenplace;
-            if (places.length > 0) {
-                chosenplace = places.reduce((a, b) => placeCount[a] > placeCount[b] ? a : b);
-            } else {
-                members.sort((a, b) => a.vacation_code - b.vacation_code);
-                chosenplace = members[0].place;
+            const majorityLocation = Object.keys(locationCount).reduce((a, b) => locationCount[a] > locationCount[b] ? a : b);
+            const majorityVacationType = Object.keys(vacationTypeCount).reduce((a, b) => vacationTypeCount[a] > vacationTypeCount[b] ? a : b);
+            console.log(majorityLocation, majorityVacationType);
+
+            let latestStartDate = new Date(Math.max(...preferences.map(pref => new Date(pref.start_date))));
+            let earliestEndDate = new Date(Math.min(...preferences.map(pref => new Date(pref.end_date))));
+            console.log(latestStartDate, earliestEndDate);
+
+            if (latestStartDate > earliestEndDate) {
+                connection.end();
+                return { success: false, message: "No overlapping dates found." };
             }
-            const typeCount = {};
-            members.forEach(member => {
-                if (member.vacationType) {
-                    if (typeCount[member.vacationType]) {
-                        typeCount[member.vacationType]++;
-                    } else {
-                        typeCount[member.vacationType] = 1;
-                    }
-                }
-            });
-            const vacationTypes = Object.keys(typeCount);
-            let chosenVacationType;
-            if (vacationTypes.length > 0) {
-                chosenVacationType = vacationTypes.reduce((a, b) => typeCount[a] > typeCount[b] ? a : b);
-            } else {
-                chosenVacationType = members[0].vacationType;
-            }
-            const startDates = members.map(member => new Date(member.start_date));
-        const endDates = members.map(member => new Date(member.end_date));
-        let startDate = new Date(Math.max(...startDates));
-        let endDate = new Date(Math.min(...endDates));
-        if (startDate > endDate) {
-            return res.status(400).json({ success: false, message: "Invalid date range." });
-        }
-        startDate = startDate.toISOString().split('T')[0];
-        endDate = endDate.toISOString().split('T')[0];
-            res.json({
+            const earliestPreference = preferences.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0];
+            const finalLocation = locationCount[majorityLocation] > 1 ? majorityLocation : earliestPreference.location;
+            const finalVacationType = vacationTypeCount[majorityVacationType] > 1 ? majorityVacationType : earliestPreference.type_of_vacation;
+            console.log(finalLocation, finalVacationType);
+            connection.end();
+
+            return {
                 success: true,
-                place: chosenplace,
-                vacationType: chosenVacationType,
-                startDate: startDate,
-                endDate: endDate
-            });
+                location: finalLocation,
+                type_of_vacation: finalVacationType,
+                start_date: latestStartDate.toISOString().split('T')[0],
+                end_date: earliestEndDate.toISOString().split('T')[0]
+            };
+
         } catch (error) {
-            console.error('Error fetching vacations:', error);
-            res.status(500).json({ success: false, message: 'Internal Server Error' });
+            console.error('Error calculating vacation results:', error);
+            return { success: false, message: 'Internal Server Error' };
         }
     }
 };
