@@ -24,6 +24,14 @@ exports.posts_controller = {
             return res.status(400).json({ success: false, message: 'All fields are required' });
         }
 
+        const startDate = new Date(start_date);
+        const endDate = new Date(end_date);
+        const diffTime = Math.abs(endDate - startDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+        if (diffDays >= 7) {
+            return res.status(400).json({ success: false, message: 'Vacation period should be less than 7 days' });
+        }
+        
         try {
             const connection = await dbConnection.createConnection();
             const [users] = await fetchUser(user_name, access_code);
@@ -61,4 +69,5 @@ exports.posts_controller = {
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     }
+    
 };
