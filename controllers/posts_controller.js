@@ -31,7 +31,7 @@ exports.posts_controller = {
         if (diffDays >= 7) {
             return res.status(400).json({ success: false, message: 'Vacation period should be less than 7 days' });
         }
-        
+
         try {
             const connection = await dbConnection.createConnection();
             const [users] = await fetchUser(user_name, access_code);
@@ -68,6 +68,61 @@ exports.posts_controller = {
             console.error('Error updating preference:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
+    },
+    async addPreference(req, res) {
+        const { dbConnection } = require('../db_connection');
+        const { users_controller } = require('./users_controller');
+        const { fetchUser } = users_controller;
+        const vacationPreferences = require('../data/vacation_preferences.json');
+        const { user_name, access_code, start_date, end_date, location, type_of_vacation } = req.body;
+
+        if (!user_name || !access_code || !start_date || !end_date || !location || !type_of_vacation) {
+            console.log(req.body);
+            return res.status(400).json({ success: false, message: 'All fields are required' });
+        }
+        
+        const startDate = new Date(start_date);
+        const endDate = new Date(end_date);
+        const diffTime = Math.abs(endDate - startDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+        if (diffDays >= 7) {
+            return res.status(400).json({ success: false, message: 'Vacation period should be less than 7 days' });
+        }
+
+        try {
+            const connection = await dbConnection.createConnection();
+            const [users] = await fetchUser(user_name, access_code);
+            if (users.length === 0) {
+                connection.end();
+                return res.status(404).json({ success: false, message: 'User not found in database' });
+            }
+
+            if (!vacationPreferences.locations.includes(location)) {
+                connection.end();
+                return res.status(400).json({ success: false, message: 'Invalid location' });
+            }
+
+            if (!vacationPreferences.vacation_types.includes(type_of_vacation)) {
+                connection.end();
+                return res.status(400).json({ success: false, message: 'Invalid vacation type' });
+            }
+
+            const query =  `INSERT INTO tbl_26_posts (user_name, access_code, start_date, end_date, location, type_of_vacation)
+                            VALUES (?, ?, ?, ?, ?, ?)`;
+            const values = [user_name, access_code, start_date, end_date, location, type_of_vacation];
+            console.log(values);
+            const [result] = await connection.execute(query, values);
+            connection.end();
+
+            if (result.affectedRows > 0) {
+                res.json({ success: true, message: 'Preference details added successfully' });
+            } else {
+                console.error('Failed to add preference for the user:', user_name);
+                res.status(404).json({ success: false, message: 'Failed to add preference for the user' });
+            }
+        } catch (error) {
+            console.error('Error adding preference:', error);
+            res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
     }
-    
 };
